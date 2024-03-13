@@ -20,6 +20,7 @@ namespace bluetooth_low_energy_windows
 	{
 		m_api = MyCentralManagerFlutterApi(messenger);
 		m_watcher = winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher();
+		m_watcher->ScanningMode(Advertisement::BluetoothLEScanningMode::Active);
 	}
 
 	MyCentralManager::~MyCentralManager()
