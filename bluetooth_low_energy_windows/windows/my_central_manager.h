@@ -63,7 +63,7 @@ namespace bluetooth_low_energy_windows
 		void m_clear_device(int64_t address_args);
 		void m_on_state_changed();
 		MyBluetoothLowEnergyStateArgs m_radio_state_to_args(winrt::Windows::Devices::Radios::RadioState state);
-		MyAdvertisementArgs m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement& advertisement);
+		MyAdvertisementArgs m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement& advertisement, winrt::hstring &deviceName);
 		MyPeripheralArgs m_address_to_peripheral_args(uint64_t address);
 		MyGattServiceArgs m_service_to_args(const winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService& service);
 		MyGattCharacteristicArgs m_characteristic_to_args(const winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic& characteristic);
