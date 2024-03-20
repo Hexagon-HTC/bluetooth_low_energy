@@ -11,12 +11,16 @@
 #include "my_central_manager.h"
 #include "my_exception.h"
 
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Devices::Bluetooth;
+
 namespace bluetooth_low_energy_windows
 {
 	MyCentralManager::MyCentralManager(flutter::BinaryMessenger* messenger)
 	{
 		m_api = MyCentralManagerFlutterApi(messenger);
 		m_watcher = winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher();
+		m_watcher->ScanningMode(Advertisement::BluetoothLEScanningMode::Active);
 	}
 
 	MyCentralManager::~MyCentralManager()
@@ -133,11 +137,22 @@ namespace bluetooth_low_energy_windows
 							return;
 						}
 						const auto address = event_args.BluetoothAddress();
+
+						IAsyncOperation<BluetoothLEDevice> asyncOperation = BluetoothLEDevice::FromBluetoothAddressAsync(address);
+						BluetoothLEDevice device = asyncOperation.get();
+
+						winrt::hstring deviceName{};
+						if (device)
+						{
+							std::wcout << L"Device name: "<< device.Name().c_str() <<std::endl;
+							deviceName = device.Name();
+						}
+
 						const auto peripheral_args = m_address_to_peripheral_args(address);
 						const auto rssi = event_args.RawSignalStrengthInDBm();
 						const auto rssi_args = static_cast<int64_t>(rssi);
 						const auto advertisement = event_args.Advertisement();
-						const auto advertisement_args = m_advertisement_to_args(advertisement);
+						const auto advertisement_args = m_advertisement_to_args(advertisement, deviceName);
 						m_api->OnDiscovered(peripheral_args, rssi_args, advertisement_args, [] {}, [](auto error) {});
 					});
 			}
@@ -650,10 +665,11 @@ namespace bluetooth_low_energy_windows
 		}
 	}
 
-	MyAdvertisementArgs MyCentralManager::m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement& advertisement)
+	MyAdvertisementArgs MyCentralManager::m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement &advertisement, winrt::hstring &deviceName)
 	{
-		const auto name = advertisement.LocalName();
+		const auto name = deviceName.empty() ? advertisement.LocalName() : deviceName;
 		const auto name_args = to_string(name);
+		std::wcout << "my_central_manager.cpp: m_advertisement_to_args() - " << name_args.c_str() << "\n";
 		const auto& service_uuids = advertisement.ServiceUuids();
 		auto service_uuids_args = flutter::EncodableList();
 		for (const auto& uuid : service_uuids) {
