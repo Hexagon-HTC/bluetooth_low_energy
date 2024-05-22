@@ -81,7 +81,7 @@ namespace bluetooth_low_energy_windows
 		void m_disconnect(int64_t address_args);
 		MyBluetoothLowEnergyStateArgs m_radio_state_to_args(const winrt::Windows::Devices::Radios::RadioState &state);
 		MyConnectionStateArgs m_connection_status_to_args(const winrt::Windows::Devices::Bluetooth::BluetoothConnectionStatus &status);
-		MyAdvertisementArgs m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement &advertisement);
+		MyAdvertisementArgs m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement &advertisement, winrt::hstring &deviceName);
 		MyGATTServiceArgs m_service_to_args(const winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattDeviceService &service);
 		MyGATTCharacteristicArgs m_characteristic_to_args(const winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristic &characteristic);
 		flutter::EncodableList m_characteristic_properties_to_args(winrt::Windows::Devices::Bluetooth::GenericAttributeProfile::GattCharacteristicProperties properties);

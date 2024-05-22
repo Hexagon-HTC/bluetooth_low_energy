@@ -8,6 +8,7 @@ namespace bluetooth_low_energy_windows
 	{
 		m_api = MyCentralManagerFlutterAPI(messenger);
 		m_watcher = winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisementWatcher();
+		m_watcher->ScanningMode(winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEScanningMode::Active);
 	}
 
 	MyCentralManager::~MyCentralManager()
@@ -194,11 +195,17 @@ namespace bluetooth_low_energy_windows
 						auto& api = m_api.value();
 						const auto address = event_args.BluetoothAddress();
 						const auto address_args = static_cast<int64_t>(address);
+						winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Devices::Bluetooth::BluetoothLEDevice> asyncOperation = winrt::Windows::Devices::Bluetooth::BluetoothLEDevice::FromBluetoothAddressAsync(address);
+						winrt::Windows::Devices::Bluetooth::BluetoothLEDevice device = asyncOperation.get();
+						winrt::hstring deviceName{};
+						if(device) {
+							deviceName = device.Name();
+						}
 						const auto peripheral_args = MyPeripheralArgs(address_args);
 						const auto rssi = event_args.RawSignalStrengthInDBm();
 						const auto rssi_args = static_cast<int64_t>(rssi);
 						const auto advertisement = event_args.Advertisement();
-						const auto advertisement_args = m_advertisement_to_args(advertisement);
+						const auto advertisement_args = m_advertisement_to_args(advertisement, deviceName);
 						// TODO: Make this thread safe when this issue closed: https://github.com/flutter/flutter/issues/134346.
 						api.OnDiscovered(peripheral_args, rssi_args, advertisement_args, [] {}, [](auto error) {}); });
 			}
@@ -764,9 +771,9 @@ namespace bluetooth_low_energy_windows
 		}
 	}
 
-	MyAdvertisementArgs MyCentralManager::m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement &advertisement)
+	MyAdvertisementArgs MyCentralManager::m_advertisement_to_args(const winrt::Windows::Devices::Bluetooth::Advertisement::BluetoothLEAdvertisement &advertisement, winrt::hstring & deviceName)
 	{
-		const auto name = advertisement.LocalName();
+		const auto name = deviceName.empty() ? advertisement.LocalName() : deviceName;
 		const auto name_args = winrt::to_string(name);
 		const auto service_uuids = advertisement.ServiceUuids();
 		auto service_uuids_args = flutter::EncodableList();

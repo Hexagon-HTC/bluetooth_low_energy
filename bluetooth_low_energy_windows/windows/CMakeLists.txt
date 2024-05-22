@@ -20,9 +20,18 @@ set(PLUGIN_NAME "bluetooth_low_energy_windows_plugin")
 set(CPPWINRT_VERSION "2.0.230706.1")
 
 find_program(NUGET nuget)
+
 if(NOT NUGET)
-  message(FATAL_ERROR "Nuget.exe not found")  
+  message(STATUS "NuGet executable not found. Downloading...")
+  set(NUGET_URL "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe")
+  set(NUGET_DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/tools")
+  file(DOWNLOAD ${NUGET_URL} ${NUGET_DOWNLOAD_DIR}/nuget.exe)
+  if(NOT EXISTS ${NUGET_DOWNLOAD_DIR}/nuget.exe)
+    message(FATAL_ERROR "Failed to download NuGet.")
+  endif()
+  set(NUGET ${NUGET_DOWNLOAD_DIR}/nuget.exe)
 endif()
+message(STATUS "NuGet found: ${NUGET}")
 
 execute_process(COMMAND
   ${NUGET} install Microsoft.Windows.CppWinRT -Version ${CPPWINRT_VERSION} -OutputDirectory packages
